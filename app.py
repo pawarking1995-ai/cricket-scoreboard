@@ -4,6 +4,67 @@ from PIL import Image
 
 st.set_page_config(page_title="Cricket Scoreboard Manager Pro", layout="wide")
 
+# ==========================================
+# CUSTOM CSS STYLING FOR ATTRACTIVE LOOK
+# ==========================================
+st.markdown("""
+<style>
+    /* Main Background & Font */
+    .main {
+        background-color: #0e1117;
+        color: #ffffff;
+    }
+    
+    /* Header Styling */
+    h1, h2, h3 {
+        color: #00ffcc !important;
+        font-family: 'Helvetica Neue', sans-serif;
+    }
+    
+    /* Metric Cards Styling */
+    div[data-testid="stMetric"] {
+        background: linear-gradient(135deg, #1f4068 0%, #162447 100%);
+        padding: 15px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
+        border: 1px solid #00ffcc;
+        text-align: center;
+    }
+    div[data-testid="stMetric"] label {
+        color: #e4e4e4 !important;
+        font-size: 16px !important;
+        font-weight: bold;
+    }
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
+        color: #00ffcc !important;
+        font-size: 28px !important;
+    }
+
+    /* Wicket Section Box */
+    .wicket-box {
+        background: linear-gradient(135deg, #2c003e 0%, #3f2b96 100%);
+        padding: 20px;
+        border-radius: 15px;
+        border: 2px solid #ff4b5c;
+        box-shadow: 0 4px 20px rgba(255, 75, 92, 0.3);
+        margin-bottom: 20px;
+    }
+
+    /* Button Styling */
+    .stButton>button {
+        border-radius: 8px;
+        font-weight: bold;
+        transition: 0.3s ease;
+        width: 100%;
+    }
+    
+    .stButton>button:hover {
+        transform: scale(1.05);
+        box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 st.title("🏏 Cricket Scoreboard Manager Pro (Web Version)")
 
 # Initialize Global Session States
@@ -149,15 +210,15 @@ def add_ball_logic(is_legal=True):
 col_l1, col_title, col_l2 = st.columns([1, 4, 1])
 with col_l1:
     if team1_logo: st.image(Image.open(team1_logo), width=80)
-    else: st.markdown(f"**{team1}**")
+    else: st.markdown(f"### 🛡️ {team1}")
 
 with col_title:
-    st.subheader(f"📍 Innings {curr}: {batting_team} (Batting) vs {bowling_team} (Bowling)")
+    st.markdown(f"<h2 style='text-align: center;'>Innings {curr}: {batting_team} vs {bowling_team}</h2>", unsafe_allow_html=True)
     st.info(f"🪙 **Toss:** {toss_winner} won the toss and elected to **{toss_decision}** first.")
 
 with col_l2:
     if team2_logo: st.image(Image.open(team2_logo), width=80)
-    else: st.markdown(f"**{team2}**")
+    else: st.markdown(f"### ⚔️ {team2}")
 
 active_batting_squad = batting_squad_1 if curr == 1 else batting_squad_2
 active_bowling_squad = bowling_squad_1 if curr == 1 else bowling_squad_2
@@ -189,19 +250,19 @@ col6.metric("6s", sixes)
 st.markdown("---")
 
 # ==========================================
-# WICKET DETAILS PANEL (SCREENSHOT INSPIRED)
+# WICKET DETAILS PANEL (STYLISH BOX)
 # ==========================================
-st.markdown("### 🛑 WICKET DETAILS")
-w_col1, w_col2, w_col3, w_col4, w_col5 = st.columns(5)
+st.markdown("""
+<div style='background: linear-gradient(135deg, #1f4068 0%, #162447 100%); padding: 15px; border-radius: 12px; border: 2px solid #ff4b5c; margin-bottom: 20px;'>
+    <h3 style='color: #ff4b5c; margin-top: 0;'>🔴 WICKET DETAILS</h3>
+</div>
+""", unsafe_allow_html=True)
 
-with w_col1:
-    out_batsman = st.selectbox("OUT BATSMAN", active_batting_squad)
-with w_col2:
-    fielder_name = st.selectbox("FIELDER", active_bowling_squad)
-with w_col3:
-    out_type = st.selectbox("OUT TYPE", ["Caught", "Bowled", "Run Out", "Stumped", "LBW", "Hit Wicket", "Retired Hurt", "Obstructing the Field"])
-with w_col4:
-    wicket_bowler = st.selectbox("BOWLER", active_bowling_squad, index=active_bowling_squad.index(current_bowler) if current_bowler in active_bowling_squad else 0)
+w_col1, w_col2, w_col3, w_col4, w_col5 = st.columns(5)
+with w_col1: out_batsman = st.selectbox("OUT BATSMAN", active_batting_squad)
+with w_col2: fielder_name = st.selectbox("FIELDER", active_bowling_squad)
+with w_col3: out_type = st.selectbox("OUT TYPE", ["Caught", "Bowled", "Run Out", "Stumped", "LBW", "Hit Wicket", "Retired Hurt", "Obstructing the Field"])
+with w_col4: wicket_bowler = st.selectbox("BOWLER", active_bowling_squad, index=active_bowling_squad.index(current_bowler) if current_bowler in active_bowling_squad else 0)
 with w_col5:
     st.markdown("<br>", unsafe_allow_html=True)
     set_wicket_btn = st.button("🔴 SET WICKET", use_container_width=True)
@@ -212,7 +273,6 @@ if set_wicket_btn:
     nb, no = add_ball_logic(True)
     update_curr(runs, new_wickets, nb, no, extras, fours, sixes)
     
-    # Update Batting DF
     bat_df = st.session_state.i1_batting_df if curr == 1 else st.session_state.i2_batting_df
     if out_batsman in bat_df['Batsman'].values:
         idx = bat_df.index[bat_df['Batsman'] == out_batsman][0]
@@ -224,7 +284,6 @@ if set_wicket_btn:
         else:
             bat_df.loc[idx, 'Bowled / Fielder'] = wicket_bowler
 
-    # Update Bowling DF
     bowl_df = st.session_state.i1_bowling_df if curr == 1 else st.session_state.i2_bowling_df
     if wicket_bowler in bowl_df['Bowler'].values and out_type not in ["Run Out", "Retired Hurt"]:
         b_idx = bowl_df.index[bowl_df['Bowler'] == wicket_bowler][0]
@@ -269,13 +328,13 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
 
 c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 with c1:
-    if st.button("0 Run (Dot)"): record_ball(0, True, False, False, True); st.rerun()
+    if st.button("⚪ 0 Run (Dot)"): record_ball(0, True, False, False, True); st.rerun()
 with c2:
-    if st.button("+1 Run"): record_ball(1, True, False, False, False); st.rerun()
+    if st.button("➕ 1 Run"): record_ball(1, True, False, False, False); st.rerun()
 with c3:
-    if st.button("+2 Runs"): record_ball(2, True, False, False, False); st.rerun()
+    if st.button("➕ 2 Runs"): record_ball(2, True, False, False, False); st.rerun()
 with c4:
-    if st.button("+3 Runs"): record_ball(3, True, False, False, False); st.rerun()
+    if st.button("➕ 3 Runs"): record_ball(3, True, False, False, False); st.rerun()
 with c5:
     if st.button("🔥 4 Runs"): record_ball(4, True, True, False, False); st.rerun()
 with c6:
@@ -290,13 +349,13 @@ with c7:
 # Extras
 e1, e2 = st.columns(2)
 with e1:
-    if st.button("Wide (+1 Extra)"):
+    if st.button("🟡 Wide (+1 Extra)"):
         save_history()
         if curr == 1: st.session_state.i1_extras += 1
         else: st.session_state.i2_extras += 1
         update_curr(runs + 1, wickets, balls, overs, extras + 1, fours, sixes); st.rerun()
 with e2:
-    if st.button("No Ball (+1 Extra)"):
+    if st.button("🟠 No Ball (+1 Extra)"):
         save_history()
         if curr == 1: st.session_state.i1_extras += 1
         else: st.session_state.i2_extras += 1
