@@ -59,21 +59,46 @@ i2_bowl = i1_bat
 st.session_state.i1_batting = i1_bat
 st.session_state.i1_bowling = i1_bowl
 st.session_state.i2_batting = i2_bat
-st.session_state.i2_bowling = i2_bowl
+st.session_state.i2_bowl = i2_bowl
 
 batting_team = i1_bat if st.session_state.inning == 1 else i2_bat
 bowling_team = i1_bowl if st.session_state.inning == 1 else i2_bowl
 
 st.sidebar.markdown("---")
-st.sidebar.header("👥 Player Squads")
-team1_players_input = st.sidebar.text_area(f"{team1} Players (Comma separated)", "Player 1, Player 2, Player 3, Player 4, Player 5")
-team2_players_input = st.sidebar.text_area(f"{team2} Players (Comma separated)", "Player A, Player B, Player C, Player D, Player E")
+st.sidebar.header("👥 Player Squads (1 to 11)")
+default_squad_1 = ", ".join([f"Player {i}" for i in range(1, 12)])
+default_squad_2 = ", ".join([f"Player {chr(65+i)}" for i in range(11)])
+
+team1_players_input = st.sidebar.text_area(f"{team1} Players (11 names comma separated)", default_squad_1)
+team2_players_input = st.sidebar.text_area(f"{team2} Players (11 names comma separated)", default_squad_2)
 
 team1_players = [p.strip() for p in team1_players_input.split(",") if p.strip()]
 team2_players = [p.strip() for p in team2_players_input.split(",") if p.strip()]
 
 batting_squad = team1_players if batting_team == team1 else team2_players
 bowling_squad = team2_players if bowling_team == team2 else team1_players
+
+# Initialize 1st Innings Detailed Scorecard DataFrames if not present
+if 'i1_batting_df' not in st.session_state:
+    st.session_state.i1_batting_df = pd.DataFrame({
+        "Batsman": batting_squad[:11] if len(batting_squad) >= 11 else batting_squad + [""]*(11-len(batting_squad)),
+        "Runs": [0]*11,
+        "Balls": [0]*11,
+        "4s": [0]*11,
+        "6s": [0]*11,
+        "Status": ["Yet to Bat"]*11
+    })
+
+if 'i1_bowling_df' not in st.session_state:
+    st.session_state.i1_bowling_df = pd.DataFrame({
+        "Bowler": bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad,
+        "Overs": [0.0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad),
+        "Dot Balls": [0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad),
+        "Maidens": [0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad),
+        "Runs": [0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad),
+        "Wickets": [0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad),
+        "Economy": [0.0]*len(bowling_squad[:5] if len(bowling_squad) >= 5 else bowling_squad)
+    })
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Reset Match Score"):
@@ -257,6 +282,24 @@ if curr == 1:
         st.session_state.inning = 2
         st.rerun()
 
+# 1st Innings Detailed Scorecards (Batting 1-11 & Bowling)
+if curr == 1 or st.session_state.get('i1_runs', 0) > 0:
+    st.markdown("---")
+    st.subheader(f"📊 1st Innings Detailed Scorecard ({i1_bat})")
+    
+    col_b1, col_b2 = st.columns(2)
+    
+    with col_b1:
+        st.markdown("#### 🏏 Batting Scorecard (1 to 11)")
+        # Editable dataframe for 1st innings batting
+        edited_bat_df = st.data_editor(st.session_state.i1_batting_df, key="bat_editor_1", num_rows="fixed")
+        st.session_state.i1_batting_df = edited_bat_df
+
+    with col_b2:
+        st.markdown("#### ⚾ Bowling Scorecard")
+        edited_bowl_df = st.data_editor(st.session_state.i1_bowling_df, key="bowl_editor_1", num_rows="fixed")
+        st.session_state.i1_bowling_df = edited_bowl_df
+
 # Match Summary Table Section
 st.markdown("---")
 st.subheader("📋 Match Summary & Scorecards")
@@ -281,7 +324,7 @@ summary_data = [
     {
         "Innings": "2nd Innings",
         "Batting Team": st.session_state.i2_batting,
-        "Bowling Team": st.session_state.i2_bowling,
+        "Bowling Team": st.session_state.i2_bowl,
         "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}",
         "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}",
         "Extras": st.session_state.i2_extras,
