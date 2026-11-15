@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+from PIL import Image
 
 st.set_page_config(page_title="Cricket Scoreboard Manager Pro", layout="wide")
 
@@ -30,22 +31,49 @@ if 'i2_sixes' not in st.session_state: st.session_state.i2_sixes = 0
 if 'i2_history' not in st.session_state: st.session_state.i2_history = []
 
 # Sidebar for Team & Match Setup
-st.sidebar.header("⚙ Match Setup")
+st.sidebar.header("⚙ Match Setup & Logos")
 team1 = st.sidebar.text_input("Team A Name", "AUS")
+team1_logo = st.sidebar.file_uploader(f"Upload {team1} Logo", type=["png", "jpg", "jpeg"], key="t1_logo")
+
 team2 = st.sidebar.text_input("Team B Name", "PAK")
+team2_logo = st.sidebar.file_uploader(f"Upload {team2} Logo", type=["png", "jpg", "jpeg"], key="t2_logo")
+
 match_overs = st.sidebar.number_input("Total Match Overs", min_value=1, max_value=50, value=5)
 
-if st.session_state.inning == 1:
-    batting_team = st.sidebar.selectbox("1st Inning Batting Team", [team1, team2])
-    bowling_team = team2 if batting_team == team1 else team1
-    st.session_state.i1_batting = batting_team
-    st.session_state.i1_bowling = bowling_team
-    st.session_state.i2_batting = bowling_team
-    st.session_state.i2_bowling = batting_team
+st.sidebar.markdown("---")
+st.sidebar.header("🪙 Toss Decision")
+toss_winner = st.sidebar.selectbox("Who won the Toss?", [team1, team2])
+toss_decision = st.sidebar.selectbox("Toss Decision", ["Batting", "Bowling"])
+
+# Determine 1st and 2nd Innings batting teams based on Toss
+if toss_winner == team1:
+    i1_bat = team1 if toss_decision == "Batting" else team2
+    i1_bowl = team2 if toss_decision == "Batting" else team1
 else:
-    batting_team = st.session_state.i2_batting
-    bowling_team = st.session_state.i2_bowling
-    st.sidebar.info(f"**2nd Inning Batting:** {batting_team} | **Bowling:** {bowling_team}")
+    i1_bat = team2 if toss_decision == "Batting" else team1
+    i1_bowl = team1 if toss_decision == "Batting" else team2
+
+i2_bat = i1_bowl
+i2_bowl = i1_bat
+
+st.session_state.i1_batting = i1_bat
+st.session_state.i1_bowling = i1_bowl
+st.session_state.i2_batting = i2_bat
+st.session_state.i2_bowling = i2_bowl
+
+batting_team = i1_bat if st.session_state.inning == 1 else i2_bat
+bowling_team = i1_bowl if st.session_state.inning == 1 else i2_bowl
+
+st.sidebar.markdown("---")
+st.sidebar.header("👥 Player Squads")
+team1_players_input = st.sidebar.text_area(f"{team1} Players (Comma separated)", "Player 1, Player 2, Player 3, Player 4, Player 5")
+team2_players_input = st.sidebar.text_area(f"{team2} Players (Comma separated)", "Player A, Player B, Player C, Player D, Player E")
+
+team1_players = [p.strip() for p in team1_players_input.split(",") if p.strip()]
+team2_players = [p.strip() for p in team2_players_input.split(",") if p.strip()]
+
+batting_squad = team1_players if batting_team == team1 else team2_players
+bowling_squad = team2_players if bowling_team == team2 else team1_players
 
 st.sidebar.markdown("---")
 if st.sidebar.button("🔄 Reset Match Score"):
@@ -95,8 +123,32 @@ def add_ball_logic(is_legal=True):
             b = 0
     return b, o
 
-# Main Header Stats
-st.subheader(f"📍 Innings {curr}: {batting_team} (Batting) vs {bowling_team} (Bowling)")
+# Display Logos and Header Stats
+col_l1, col_title, col_l2 = st.columns([1, 4, 1])
+with col_l1:
+    if team1_logo:
+        st.image(Image.open(team1_logo), width=80)
+    else:
+        st.markdown(f"**{team1}**")
+
+with col_title:
+    st.subheader(f"📍 Innings {curr}: {batting_team} (Batting) vs {bowling_team} (Bowling)")
+    st.info(f"🪙 **Toss:** {toss_winner} won the toss and elected to **{toss_decision}** first.")
+
+with col_l2:
+    if team2_logo:
+        st.image(Image.open(team2_logo), width=80)
+    else:
+        st.markdown(f"**{team2}**")
+
+# On-field Players Selection
+col_p1, col_p2, col_p3 = st.columns(3)
+with col_p1:
+    striker = st.selectbox("🏏 Striker", batting_squad if batting_squad else ["No Players"])
+with col_p2:
+    non_striker = st.selectbox("🏃 Non-Striker", batting_squad if batting_squad else ["No Players"])
+with col_p3:
+    current_bowler = st.selectbox("⚾ Current Bowler", bowling_squad if bowling_squad else ["No Players"])
 
 if curr == 2:
     runs_needed = st.session_state.target - runs
@@ -114,6 +166,7 @@ if curr == 2:
 total_ov_float = overs + (balls / 6.0)
 crr = f"{runs / total_ov_float:.2f}" if total_ov_float > 0 else "0.00"
 
+st.markdown("---")
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 col1.metric("Score", f"{runs}/{wickets}")
 col2.metric("Overs", f"{overs}.{balls}")
