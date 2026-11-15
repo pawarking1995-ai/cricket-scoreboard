@@ -81,7 +81,7 @@ bowling_squad_1 = team2_players if i1_bowl == team2 else team1_players
 batting_squad_2 = team1_players if i2_bat == team1 else team2_players
 bowling_squad_2 = team2_players if i2_bowl == team2 else team1_players
 
-# Initialize 1st Innings Scorecards (1 to 11)
+# Initialize 1st Innings Scorecards (1 to 11 with Wicket Details)
 if 'i1_batting_df' not in st.session_state:
     st.session_state.i1_batting_df = pd.DataFrame({
         "Batsman": batting_squad_1[:11] if len(batting_squad_1) >= 11 else batting_squad_1 + [""]*(11-len(batting_squad_1)),
@@ -89,7 +89,9 @@ if 'i1_batting_df' not in st.session_state:
         "Balls": [0]*11,
         "4s": [0]*11,
         "6s": [0]*11,
-        "SR": [0.0]*11
+        "SR": [0.0]*11,
+        "How Out / Status": ["Yet to Bat"]*11,
+        "Bowled / Fielder": ["-"]*11
     })
 
 if 'i1_bowling_df' not in st.session_state:
@@ -102,7 +104,7 @@ if 'i1_bowling_df' not in st.session_state:
         "Economy": [0.0]*11
     })
 
-# Initialize 2nd Innings Scorecards (1 to 11)
+# Initialize 2nd Innings Scorecards (1 to 11 with Wicket Details)
 if 'i2_batting_df' not in st.session_state:
     st.session_state.i2_batting_df = pd.DataFrame({
         "Batsman": batting_squad_2[:11] if len(batting_squad_2) >= 11 else batting_squad_2 + [""]*(11-len(batting_squad_2)),
@@ -110,7 +112,9 @@ if 'i2_batting_df' not in st.session_state:
         "Balls": [0]*11,
         "4s": [0]*11,
         "6s": [0]*11,
-        "SR": [0.0]*11
+        "SR": [0.0]*11,
+        "How Out / Status": ["Yet to Bat"]*11,
+        "Bowled / Fielder": ["-"]*11
     })
 
 if 'i2_bowling_df' not in st.session_state:
@@ -394,7 +398,6 @@ st.table(df_summary)
 st.markdown("---")
 st.subheader("🌟 Top Performers")
 
-# Determine which df belongs to Team A and Team B
 if i1_bat == team1:
     team_a_bat_df = st.session_state.i1_batting_df
     team_b_bowl_df = st.session_state.i1_bowling_df
