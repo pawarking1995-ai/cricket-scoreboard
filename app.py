@@ -81,50 +81,32 @@ bowling_squad_1 = team2_players if i1_bowl == team2 else team1_players
 batting_squad_2 = team1_players if i2_bat == team1 else team2_players
 bowling_squad_2 = team2_players if i2_bowl == team2 else team1_players
 
-# Initialize 1st Innings Scorecards (1 to 11 with Wicket Details)
+# Initialize 1st Innings DataFrames
 if 'i1_batting_df' not in st.session_state:
     st.session_state.i1_batting_df = pd.DataFrame({
         "Batsman": batting_squad_1[:11] if len(batting_squad_1) >= 11 else batting_squad_1 + [""]*(11-len(batting_squad_1)),
-        "Runs": [0]*11,
-        "Balls": [0]*11,
-        "4s": [0]*11,
-        "6s": [0]*11,
-        "SR": [0.0]*11,
-        "How Out / Status": ["Yet to Bat"]*11,
-        "Bowled / Fielder": ["-"]*11
+        "Runs": [0]*11, "Balls": [0]*11, "4s": [0]*11, "6s": [0]*11, "SR": [0.0]*11,
+        "How Out / Status": ["Yet to Bat"]*11, "Bowled / Fielder": ["-"]*11
     })
 
 if 'i1_bowling_df' not in st.session_state:
     st.session_state.i1_bowling_df = pd.DataFrame({
         "Bowler": bowling_squad_1[:11] if len(bowling_squad_1) >= 11 else bowling_squad_1 + [""]*(11-len(bowling_squad_1)),
-        "Overs": [0.0]*11,
-        "Dots": [0]*11,
-        "Runs": [0]*11,
-        "Wickets": [0]*11,
-        "Economy": [0.0]*11
+        "Overs": [0.0]*11, "Dots": [0]*11, "Runs": [0]*11, "Wickets": [0]*11, "Economy": [0.0]*11
     })
 
-# Initialize 2nd Innings Scorecards (1 to 11 with Wicket Details)
+# Initialize 2nd Innings DataFrames
 if 'i2_batting_df' not in st.session_state:
     st.session_state.i2_batting_df = pd.DataFrame({
         "Batsman": batting_squad_2[:11] if len(batting_squad_2) >= 11 else batting_squad_2 + [""]*(11-len(batting_squad_2)),
-        "Runs": [0]*11,
-        "Balls": [0]*11,
-        "4s": [0]*11,
-        "6s": [0]*11,
-        "SR": [0.0]*11,
-        "How Out / Status": ["Yet to Bat"]*11,
-        "Bowled / Fielder": ["-"]*11
+        "Runs": [0]*11, "Balls": [0]*11, "4s": [0]*11, "6s": [0]*11, "SR": [0.0]*11,
+        "How Out / Status": ["Yet to Bat"]*11, "Bowled / Fielder": ["-"]*11
     })
 
 if 'i2_bowling_df' not in st.session_state:
     st.session_state.i2_bowling_df = pd.DataFrame({
         "Bowler": bowling_squad_2[:11] if len(bowling_squad_2) >= 11 else bowling_squad_2 + [""]*(11-len(bowling_squad_2)),
-        "Overs": [0.0]*11,
-        "Dots": [0]*11,
-        "Runs": [0]*11,
-        "Wickets": [0]*11,
-        "Economy": [0.0]*11
+        "Overs": [0.0]*11, "Dots": [0]*11, "Runs": [0]*11, "Wickets": [0]*11, "Economy": [0.0]*11
     })
 
 st.sidebar.markdown("---")
@@ -133,14 +115,13 @@ if st.sidebar.button("🔄 Reset Match Score"):
         del st.session_state[key]
     st.rerun()
 
-# Dynamic Mapping for Current Inning
 curr = st.session_state.inning
 runs = st.session_state.i1_runs if curr == 1 else st.session_state.i2_runs
 wickets = st.session_state.i1_wickets if curr == 1 else st.session_state.i2_wickets
 balls = st.session_state.i1_balls if curr == 1 else st.session_state.i2_balls
 overs = st.session_state.i1_overs if curr == 1 else st.session_state.i2_overs
 extras = st.session_state.i1_extras if curr == 1 else st.session_state.i2_extras
-fours = st.session_state.i1_fours if curr == 1 else st.session_state.i2_fours
+fours = st.session_state.i1_fours if curr == 1 else st.session_state.i1_fours
 sixes = st.session_state.i1_sixes if curr == 1 else st.session_state.i2_sixes
 history = st.session_state.i1_history if curr == 1 else st.session_state.i2_history
 
@@ -178,20 +159,16 @@ def add_ball_logic(is_legal=True):
 # Display Logos and Header Stats
 col_l1, col_title, col_l2 = st.columns([1, 4, 1])
 with col_l1:
-    if team1_logo:
-        st.image(Image.open(team1_logo), width=80)
-    else:
-        st.markdown(f"**{team1}**")
+    if team1_logo: st.image(Image.open(team1_logo), width=80)
+    else: st.markdown(f"**{team1}**")
 
 with col_title:
     st.subheader(f"📍 Innings {curr}: {batting_team} (Batting) vs {bowling_team} (Bowling)")
     st.info(f"🪙 **Toss:** {toss_winner} won the toss and elected to **{toss_decision}** first.")
 
 with col_l2:
-    if team2_logo:
-        st.image(Image.open(team2_logo), width=80)
-    else:
-        st.markdown(f"**{team2}**")
+    if team2_logo: st.image(Image.open(team2_logo), width=80)
+    else: st.markdown(f"**{team2}**")
 
 # On-field Players Selection
 active_batting_squad = batting_squad_1 if curr == 1 else batting_squad_2
@@ -208,15 +185,9 @@ with col_p3:
 if curr == 2:
     runs_needed = st.session_state.target - runs
     total_legal_balls = (match_overs * 6) - (overs * 6 + balls)
-    if runs_needed <= 0:
-        st.success(f"🎉 **{batting_team} Won the Match by chasing the target!**")
-    elif wickets >= 10 or total_legal_balls <= 0:
-        if runs < st.session_state.target - 1:
-            st.error(f"🏁 **Match Ended! {bowling_team} Won the Match!**")
-        else:
-            st.warning(f"🤝 **Match Tied!**")
-    else:
-        st.warning(f"🎯 **Target:** {st.session_state.target} | **Need {runs_needed} runs** in {total_legal_balls} balls")
+    if runs_needed <= 0: st.success(f"🎉 **{batting_team} Won the Match!**")
+    elif wickets >= 10 or total_legal_balls <= 0: st.error(f"🏁 **Match Ended!**")
+    else: st.warning(f"🎯 **Target:** {st.session_state.target} | **Need {runs_needed} runs** in {total_legal_balls} balls")
 
 total_ov_float = overs + (balls / 6.0)
 crr = f"{runs / total_ov_float:.2f}" if total_ov_float > 0 else "0.00"
@@ -232,46 +203,75 @@ col6.metric("6s", sixes)
 
 st.markdown("---")
 
-# Scoring Controls
+# Scoring Controls & Auto-Update Function
 st.subheader("🎮 Live Scoring Controls")
 
-c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
+def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_wicket=False, is_dot=False):
+    save_history()
+    global runs, wickets, fours, sixes
+    new_runs = runs + r_add
+    new_wickets = wickets + (1 if is_wicket and wickets < 10 else 0)
+    new_fours = fours + (1 if is_four else 0)
+    new_sixes = sixes + (1 if is_six else 0)
+    nb, no = add_ball_logic(is_legal)
+    
+    update_curr(new_runs, new_wickets, nb, no, extras, new_fours, new_sixes)
+    
+    # Auto-update active Batsman in Dataframe
+    bat_df = st.session_state.i1_batting_df if curr == 1 else st.session_state.i2_batting_df
+    if striker in bat_df['Batsman'].values:
+        idx = bat_df.index[bat_df['Batsman'] == striker][0]
+        bat_df.loc[idx, 'Runs'] += r_add
+        if is_legal: bat_df.loc[idx, 'Balls'] += 1
+        if is_four: bat_df.loc[idx, '4s'] += 1
+        if is_six: bat_df.loc[idx, '6s'] += 1
+        if is_wicket: 
+            bat_df.loc[idx, 'How Out / Status'] = "Out"
+            bat_df.loc[idx, 'Bowled / Fielder'] = current_bowler
+        else:
+            bat_df.loc[idx, 'How Out / Status'] = "Batting"
 
+    # Auto-update active Bowler in Dataframe
+    bowl_df = st.session_state.i1_bowling_df if curr == 1 else st.session_state.i2_bowling_df
+    if current_bowler in bowl_df['Bowler'].values:
+        b_idx = bowl_df.index[bowl_df['Bowler'] == current_bowler][0]
+        bowl_df.loc[b_idx, 'Runs'] += r_add
+        if is_dot: bowl_df.loc[b_idx, 'Dots'] += 1
+        if is_wicket: bowl_df.loc[b_idx, 'Wickets'] += 1
+        if is_legal:
+            curr_ov = bowl_df.loc[b_idx, 'Overs']
+            full_ov = int(curr_ov)
+            ball_part = round((curr_ov - full_ov) * 10)
+            ball_part += 1
+            if ball_part >= 6:
+                bowl_df.loc[b_idx, 'Overs'] = full_ov + 1.0
+            else:
+                bowl_df.loc[b_idx, 'Overs'] = full_ov + (ball_part / 10.0)
+
+c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 with c1:
     if st.button("0 Run (Dot)"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs, wickets, nb, no, extras, fours, sixes)
+        record_ball(0, True, False, False, False, True)
         st.rerun()
 with c2:
     if st.button("+1 Run"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs + 1, wickets, nb, no, extras, fours, sixes)
+        record_ball(1, True, False, False, False, False)
         st.rerun()
 with c3:
     if st.button("+2 Runs"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs + 2, wickets, nb, no, extras, fours, sixes)
+        record_ball(2, True, False, False, False, False)
         st.rerun()
 with c4:
     if st.button("+3 Runs"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs + 3, wickets, nb, no, extras, fours, sixes)
+        record_ball(3, True, False, False, False, False)
         st.rerun()
 with c5:
     if st.button("🔥 4 Runs"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs + 4, wickets, nb, no, extras, fours+1, sixes)
+        record_ball(4, True, True, False, False, False)
         st.rerun()
 with c6:
     if st.button("🚀 6 Runs"):
-        save_history()
-        nb, no = add_ball_logic(True)
-        update_curr(runs + 6, wickets, nb, no, extras, fours, sixes+1)
+        record_ball(6, True, False, True, False, False)
         st.rerun()
 with c7:
     if st.button("↩️ Undo"):
@@ -280,31 +280,29 @@ with c7:
             update_curr(last['runs'], last['wickets'], last['balls'], last['overs'], last['extras'], last['fours'], last['sixes'])
             st.success("Last action undone!")
             st.rerun()
-        else:
-            st.warning("Nothing to undo!")
 
 st.markdown("### Extras & Wickets")
 e1, e2, e3 = st.columns(3)
-
 with e1:
     if st.button("Wide (+1 Extra)"):
         save_history()
+        if curr == 1: st.session_state.i1_extras += 1
+        else: st.session_state.i2_extras += 1
         update_curr(runs + 1, wickets, balls, overs, extras + 1, fours, sixes)
         st.rerun()
 with e2:
     if st.button("No Ball (+1 Extra)"):
         save_history()
+        if curr == 1: st.session_state.i1_extras += 1
+        else: st.session_state.i2_extras += 1
         update_curr(runs + 1, wickets, balls, overs, extras + 1, fours, sixes)
         st.rerun()
 with e3:
     if st.button("❌ Wicket"):
-        save_history()
-        if wickets < 10:
-            nb, no = add_ball_logic(True)
-            update_curr(runs, wickets + 1, nb, no, extras, fours, sixes)
+        record_ball(0, True, False, False, True, True)
         st.rerun()
 
-# Innings Switch / End Button
+# Innings Switch Button
 st.markdown("---")
 if curr == 1:
     if st.button("🏁 End 1st Innings & Start 2nd Innings"):
@@ -313,130 +311,42 @@ if curr == 1:
         st.rerun()
 
 # ==========================================
-# 1. 1ST INNINGS FULL SCORECARDS (1 TO 11)
+# FULL SCORECARDS (1 TO 11)
 # ==========================================
 st.markdown("---")
-st.subheader(f"📊 1st Innings Full Scorecard ({i1_bat} Batting vs {i1_bowl} Bowling)")
+st.subheader(f"📊 1st Innings Full Scorecard ({i1_bat} vs {i1_bowl})")
 col_s1, col_s2 = st.columns(2)
-
 with col_s1:
-    st.markdown(f"#### 🏏 {i1_bat} Batting (1 to 11)")
     st.session_state.i1_batting_df['SR'] = st.session_state.i1_batting_df.apply(
-        lambda row: round((row['Runs'] / row['Balls']) * 100, 2) if row['Balls'] > 0 else 0.0, axis=1
+        lambda r: round((r['Runs'] / r['Balls']) * 100, 2) if r['Balls'] > 0 else 0.0, axis=1
     )
     st.session_state.i1_batting_df = st.data_editor(st.session_state.i1_batting_df, key="i1_bat_full", num_rows="fixed")
-
 with col_s2:
-    st.markdown(f"#### ⚾ {i1_bowl} Bowling (1 to 11)")
     st.session_state.i1_bowling_df['Economy'] = st.session_state.i1_bowling_df.apply(
-        lambda row: round(row['Runs'] / row['Overs'], 2) if row['Overs'] > 0 else 0.0, axis=1
+        lambda r: round(r['Runs'] / r['Overs'], 2) if r['Overs'] > 0 else 0.0, axis=1
     )
     st.session_state.i1_bowling_df = st.data_editor(st.session_state.i1_bowling_df, key="i1_bowl_full", num_rows="fixed")
 
-# ==========================================
-# 2. 2ND INNINGS FULL SCORECARDS (1 TO 11)
-# ==========================================
 st.markdown("---")
-st.subheader(f"📊 2nd Innings Full Scorecard ({i2_bat} Batting vs {i2_bowl} Bowling)")
+st.subheader(f"📊 2nd Innings Full Scorecard ({i2_bat} vs {i2_bowl})")
 col_s3, col_s4 = st.columns(2)
-
 with col_s3:
-    st.markdown(f"#### 🏏 {i2_bat} Batting (1 to 11)")
     st.session_state.i2_batting_df['SR'] = st.session_state.i2_batting_df.apply(
-        lambda row: round((row['Runs'] / row['Balls']) * 100, 2) if row['Balls'] > 0 else 0.0, axis=1
+        lambda r: round((r['Runs'] / r['Balls']) * 100, 2) if r['Balls'] > 0 else 0.0, axis=1
     )
     st.session_state.i2_batting_df = st.data_editor(st.session_state.i2_batting_df, key="i2_bat_full", num_rows="fixed")
-
 with col_s4:
-    st.markdown(f"#### ⚾ {i2_bowl} Bowling (1 to 11)")
     st.session_state.i2_bowling_df['Economy'] = st.session_state.i2_bowling_df.apply(
-        lambda row: round(row['Runs'] / row['Overs'], 2) if row['Overs'] > 0 else 0.0, axis=1
+        lambda r: round(r['Runs'] / r['Overs'], 2) if r['Overs'] > 0 else 0.0, axis=1
     )
     st.session_state.i2_bowling_df = st.data_editor(st.session_state.i2_bowling_df, key="i2_bowl_full", num_rows="fixed")
 
-# ==========================================
-# 3. MATCH SUMMARY TABLE
-# ==========================================
+# Match Summary Table
 st.markdown("---")
 st.subheader("📋 Match Summary")
-
-i1_ov_f = st.session_state.i1_overs + (st.session_state.i1_balls / 6.0)
-i1_crr = f"{st.session_state.i1_runs / i1_ov_f:.2f}" if i1_ov_f > 0 else "0.00"
-
-i2_ov_f = st.session_state.i2_overs + (st.session_state.i2_balls / 6.0)
-i2_crr = f"{st.session_state.i2_runs / i2_ov_f:.2f}" if i2_ov_f > 0 else "0.00"
-
 summary_data = [
-    {
-        "Innings": "1st Innings",
-        "Batting Team": st.session_state.i1_batting,
-        "Bowling Team": st.session_state.i1_bowling,
-        "Score": f"{st.session_state.i1_runs}/{st.session_state.i1_wickets}",
-        "Overs": f"{st.session_state.i1_overs}.{st.session_state.i1_balls}",
-        "Extras": st.session_state.i1_extras,
-        "4s / 6s": f"{st.session_state.i1_fours} / {st.session_state.i1_sixes}",
-        "CRR": i1_crr
-    },
-    {
-        "Innings": "2nd Innings",
-        "Batting Team": st.session_state.i2_batting,
-        "Bowling Team": st.session_state.i2_bowling,
-        "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}",
-        "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}",
-        "Extras": st.session_state.i2_extras,
-        "4s / 6s": f"{st.session_state.i2_fours} / {st.session_state.i2_sixes}",
-        "CRR": i2_crr
-    }
+    {"Innings": "1st Innings", "Batting Team": st.session_state.i1_batting, "Bowling Team": st.session_state.i1_bowling, "Score": f"{st.session_state.i1_runs}/{st.session_state.i1_wickets}", "Overs": f"{st.session_state.i1_overs}.{st.session_state.i1_balls}"},
+    {"Innings": "2nd Innings", "Batting Team": st.session_state.i2_batting, "Bowling Team": st.session_state.i2_bowling, "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}", "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}"}
 ]
-
 df_summary = pd.DataFrame(summary_data)
 st.table(df_summary)
-
-# ==========================================
-# 4. TOP PERFORMERS (TEAM A & TEAM B)
-# ==========================================
-st.markdown("---")
-st.subheader("🌟 Top Performers")
-
-if i1_bat == team1:
-    team_a_bat_df = st.session_state.i1_batting_df
-    team_b_bowl_df = st.session_state.i1_bowling_df
-    team_b_bat_df = st.session_state.i2_batting_df
-    team_a_bowl_df = st.session_state.i2_bowling_df
-else:
-    team_b_bat_df = st.session_state.i1_batting_df
-    team_a_bowl_df = st.session_state.i1_bowling_df
-    team_a_bat_df = st.session_state.i2_batting_df
-    team_b_bowl_df = st.session_state.i2_bowling_df
-
-col_tp1, col_tp2 = st.columns(2)
-
-with col_tp1:
-    st.markdown(f"### 🛡️ {team1} (Team A) Top Performers")
-    st.markdown("#### 🏏 Top 5 Batting")
-    top_a_bat = team_a_bat_df.sort_values(by="Runs", ascending=False).head(5)
-    st.dataframe(top_a_bat, hide_index=True)
-
-    st.markdown("#### ⚾ Top 5 Bowling")
-    top_a_bowl = team_a_bowl_df.sort_values(by="Wickets", ascending=False).head(5)
-    st.dataframe(top_a_bowl, hide_index=True)
-
-with col_tp2:
-    st.markdown(f"### ⚔️ {team2} (Team B) Top Performers")
-    st.markdown("#### 🏏 Top 5 Batting")
-    top_b_bat = team_b_bat_df.sort_values(by="Runs", ascending=False).head(5)
-    st.dataframe(top_b_bat, hide_index=True)
-
-    st.markdown("#### ⚾ Top 5 Bowling")
-    top_b_bowl = team_b_bowl_df.sort_values(by="Wickets", ascending=False).head(5)
-    st.dataframe(top_b_bowl, hide_index=True)
-
-# Download CSV Button
-st.markdown("---")
-csv = df_summary.to_csv(index=False).encode('utf-8')
-st.download_button(
-    label="📥 Download Match Summary as CSV",
-    data=csv,
-    file_name='cricket_match_summary.csv',
-    mime='text/csv',
-)
