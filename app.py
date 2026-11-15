@@ -11,7 +11,6 @@ st.markdown("""
 <style>
     .main { background-color: #0e1117; color: #ffffff; }
     
-    /* Section 1: Header / Match Info */
     .match-header {
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         padding: 20px;
@@ -21,7 +20,6 @@ st.markdown("""
         border: 1px solid #4a90e2;
     }
 
-    /* Section 2: Wicket Details */
     .wicket-section {
         background: linear-gradient(135deg, #512b2b 0%, #301010 100%);
         padding: 20px;
@@ -31,7 +29,6 @@ st.markdown("""
         border: 2px solid #ff4b5c;
     }
 
-    /* Section 3: Live Scoring Controls */
     .scoring-section {
         background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
         padding: 20px;
@@ -41,7 +38,6 @@ st.markdown("""
         border: 1px solid #a8ff78;
     }
 
-    /* Section 4: Scorecards */
     .scorecard-section {
         background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
         padding: 20px;
@@ -51,7 +47,6 @@ st.markdown("""
         border: 1px solid #99c2ff;
     }
 
-    /* Section 5: Match Summary & Top Performers */
     .summary-section {
         background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
         padding: 20px;
@@ -100,7 +95,7 @@ if 'i2_fours' not in st.session_state: st.session_state.i2_fours = 0
 if 'i2_sixes' not in st.session_state: st.session_state.i2_sixes = 0
 if 'i2_history' not in st.session_state: st.session_state.i2_history = []
 
-# Sidebar for Team & Match Setup
+# Sidebar Setup
 st.sidebar.header("⚙ Match Setup & Logos")
 team1 = st.sidebar.text_input("Team A Name", "AUS")
 team1_logo = st.sidebar.file_uploader(f"Upload {team1} Logo", type=["png", "jpg", "jpeg"], key="t1_logo")
@@ -216,7 +211,7 @@ def add_ball_logic(is_legal=True):
     return b, o
 
 # ==========================================
-# SECTION 1: MATCH HEADER
+# SECTION 1: MATCH HEADER & STRIKE MANAGEMENT
 # ==========================================
 st.markdown('<div class="match-header">', unsafe_allow_html=True)
 col_l1, col_title, col_l2 = st.columns([1, 4, 1])
@@ -233,10 +228,22 @@ with col_l2:
 active_batting_squad = batting_squad_1 if curr == 1 else batting_squad_2
 active_bowling_squad = bowling_squad_1 if curr == 1 else bowling_squad_2
 
-col_p1, col_p2, col_p3 = st.columns(3)
-with col_p1: striker = st.selectbox("🏏 Striker", active_batting_squad if active_batting_squad else ["No Players"])
-with col_p2: non_striker = st.selectbox("🏃 Non-Striker", active_batting_squad if active_batting_squad else ["No Players"])
-with col_p3: current_bowler = st.selectbox("⚾ Current Bowler", active_bowling_squad if active_bowling_squad else ["No Players"])
+# Session state for maintaining strike rotation
+if 'striker' not in st.session_state: st.session_state.striker = active_batting_squad[0] if active_batting_squad else ""
+if 'non_striker' not in st.session_state: st.session_state.non_striker = active_batting_squad[1] if len(active_batting_squad) > 1 else ""
+
+col_p1, col_p2, col_p3, col_swap = st.columns([2, 2, 2, 1])
+with col_p1:
+    st.session_state.striker = st.selectbox("🏏 Striker", active_batting_squad, index=active_batting_squad.index(st.session_state.striker) if st.session_state.striker in active_batting_squad else 0)
+with col_p2:
+    st.session_state.non_striker = st.selectbox("🏃 Non-Striker", active_batting_squad, index=active_batting_squad.index(st.session_state.non_striker) if len(active_batting_squad) > 1 and st.session_state.non_striker in active_batting_squad else 1)
+with col_p3:
+    current_bowler = st.selectbox("⚾ Current Bowler", active_bowling_squad if active_bowling_squad else ["No Players"])
+with col_swap:
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🔄 Swap"):
+        st.session_state.striker, st.session_state.non_striker = st.session_state.non_striker, st.session_state.striker
+        st.rerun()
 
 if curr == 2:
     runs_needed = st.session_state.target - runs
@@ -299,7 +306,7 @@ if set_wicket_btn:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 3: LIVE SCORING CONTROLS
+# SECTION 3: LIVE SCORING & STRIKE ROTATION
 # ==========================================
 st.markdown('<div class="scoring-section">', unsafe_allow_html=True)
 st.markdown("<h3 style='color: #a8ff78; margin-top:0;'>🎮 LIVE SCORING CONTROLS</h3>", unsafe_allow_html=True)
@@ -309,12 +316,17 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
     new_runs = runs + r_add
     new_fours = fours + (1 if is_four else 0)
     new_sixes = sixes + (1 if is_six else 0)
+    
+    prev_balls = balls
+    prev_overs = overs
+    
     nb, no = add_ball_logic(is_legal)
     update_curr(new_runs, wickets, nb, no, extras, new_fours, new_sixes)
     
+    # Update active Striker stats
     bat_df = st.session_state.i1_batting_df if curr == 1 else st.session_state.i2_batting_df
-    if striker in bat_df['Batsman'].values:
-        idx = bat_df.index[bat_df['Batsman'] == striker][0]
+    if st.session_state.striker in bat_df['Batsman'].values:
+        idx = bat_df.index[bat_df['Batsman'] == st.session_state.striker][0]
         bat_df.loc[idx, 'Runs'] += r_add
         if is_legal: bat_df.loc[idx, 'Balls'] += 1
         if is_four: bat_df.loc[idx, '4s'] += 1
@@ -322,6 +334,7 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
         if bat_df.loc[idx, 'How Out / Status'] == "Yet to Bat":
             bat_df.loc[idx, 'How Out / Status'] = "Batting"
 
+    # Update Bowler stats
     bowl_df = st.session_state.i1_bowling_df if curr == 1 else st.session_state.i2_bowling_df
     if current_bowler in bowl_df['Bowler'].values:
         b_idx = bowl_df.index[bowl_df['Bowler'] == current_bowler][0]
@@ -333,6 +346,15 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
             ball_part = round((curr_ov - full_ov) * 10) + 1
             if ball_part >= 6: bowl_df.loc[b_idx, 'Overs'] = full_ov + 1.0
             else: bowl_df.loc[b_idx, 'Overs'] = full_ov + (ball_part / 10.0)
+
+    # STRIKE ROTATION LOGIC
+    # 1. Odd runs rotate strike (+1, +3, etc.)
+    if r_add % 2 != 0:
+        st.session_state.striker, st.session_state.non_striker = st.session_state.non_striker, st.session_state.striker
+        
+    # 2. Over completion (6 legal balls) rotates strike
+    if is_legal and nb == 0 and no > prev_overs:
+        st.session_state.striker, st.session_state.non_striker = st.session_state.non_striker, st.session_state.striker
 
 c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 with c1:
@@ -441,7 +463,6 @@ st.dataframe(df_summary, use_container_width=True, hide_index=True)
 st.markdown("---")
 st.markdown("### 🌟 Top 5 Performers (Team A & Team B)")
 
-# Map Team A and Team B DataFrames
 if i1_bat == team1:
     team_a_bat_df = st.session_state.i1_batting_df
     team_b_bowl_df = st.session_state.i1_bowling_df
@@ -481,6 +502,6 @@ st.download_button(
     label="📥 Download Match Summary as CSV",
     data=csv,
     file_name='cricket_match_summary.csv',
-    mime='text/csv',
+    mime='text/css',
 )
 st.markdown('</div>', unsafe_allow_html=True)
