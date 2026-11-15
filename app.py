@@ -436,3 +436,4 @@ st.download_button(
     data=csv,
     file_name='cricket_match_summary.csv',
     mime='text/csv',
+)
