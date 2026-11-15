@@ -51,7 +51,7 @@ st.markdown("""
         border: 1px solid #99c2ff;
     }
 
-    /* Section 5: Match Summary */
+    /* Section 5: Match Summary & Top Performers */
     .summary-section {
         background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
         padding: 20px;
@@ -403,10 +403,10 @@ with col_s4:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 5: MATCH SUMMARY (FIXED & VISIBLE)
+# SECTION 5: MATCH SUMMARY & TOP PERFORMERS
 # ==========================================
 st.markdown('<div class="summary-section">', unsafe_allow_html=True)
-st.markdown("<h2 style='color: #000000; margin-top:0;'>📋 MATCH SUMMARY OVERVIEW</h2>", unsafe_allow_html=True)
+st.markdown("<h2 style='color: #000000; margin-top:0;'>📋 MATCH SUMMARY & TOP PERFORMERS</h2>", unsafe_allow_html=True)
 
 i1_ov_f = st.session_state.i1_overs + (st.session_state.i1_balls / 6.0)
 i1_crr = f"{st.session_state.i1_runs / i1_ov_f:.2f}" if i1_ov_f > 0 else "0.00"
@@ -437,6 +437,43 @@ summary_data = [
 
 df_summary = pd.DataFrame(summary_data)
 st.dataframe(df_summary, use_container_width=True, hide_index=True)
+
+st.markdown("---")
+st.markdown("### 🌟 Top 5 Performers (Team A & Team B)")
+
+# Map Team A and Team B DataFrames
+if i1_bat == team1:
+    team_a_bat_df = st.session_state.i1_batting_df
+    team_b_bowl_df = st.session_state.i1_bowling_df
+    team_b_bat_df = st.session_state.i2_batting_df
+    team_a_bowl_df = st.session_state.i2_bowling_df
+else:
+    team_b_bat_df = st.session_state.i1_batting_df
+    team_a_bowl_df = st.session_state.i1_bowling_df
+    team_a_bat_df = st.session_state.i2_batting_df
+    team_b_bowl_df = st.session_state.i2_bowling_df
+
+col_tp1, col_tp2 = st.columns(2)
+
+with col_tp1:
+    st.markdown(f"#### 🛡️ {team1} (Team A)")
+    st.markdown("##### 🏏 Top 5 Batting")
+    top_a_bat = team_a_bat_df.sort_values(by="Runs", ascending=False).head(5)
+    st.dataframe(top_a_bat, hide_index=True, use_container_width=True)
+
+    st.markdown("##### ⚾ Top 5 Bowling")
+    top_a_bowl = team_a_bowl_df.sort_values(by="Wickets", ascending=False).head(5)
+    st.dataframe(top_a_bowl, hide_index=True, use_container_width=True)
+
+with col_tp2:
+    st.markdown(f"#### ⚔️ {team2} (Team B)")
+    st.markdown("##### 🏏 Top 5 Batting")
+    top_b_bat = team_b_bat_df.sort_values(by="Runs", ascending=False).head(5)
+    st.dataframe(top_b_bat, hide_index=True, use_container_width=True)
+
+    st.markdown("##### ⚾ Top 5 Bowling")
+    top_b_bowl = team_b_bowl_df.sort_values(by="Wickets", ascending=False).head(5)
+    st.dataframe(top_b_bowl, hide_index=True, use_container_width=True)
 
 st.markdown("<br>", unsafe_allow_html=True)
 csv = df_summary.to_csv(index=False).encode('utf-8')
