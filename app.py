@@ -5,63 +5,73 @@ from PIL import Image
 st.set_page_config(page_title="Cricket Scoreboard Manager Pro", layout="wide")
 
 # ==========================================
-# CUSTOM CSS STYLING FOR ATTRACTIVE LOOK
+# CUSTOM CSS FOR UNIQUE PER-SECTION COLORS
 # ==========================================
 st.markdown("""
 <style>
-    /* Main Background & Font */
-    .main {
-        background-color: #0e1117;
-        color: #ffffff;
-    }
+    .main { background-color: #0e1117; color: #ffffff; }
     
-    /* Header Styling */
-    h1, h2, h3 {
-        color: #00ffcc !important;
-        font-family: 'Helvetica Neue', sans-serif;
-    }
-    
-    /* Metric Cards Styling */
-    div[data-testid="stMetric"] {
-        background: linear-gradient(135deg, #1f4068 0%, #162447 100%);
-        padding: 15px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 255, 204, 0.2);
-        border: 1px solid #00ffcc;
-        text-align: center;
-    }
-    div[data-testid="stMetric"] label {
-        color: #e4e4e4 !important;
-        font-size: 16px !important;
-        font-weight: bold;
-    }
-    div[data-testid="stMetric"] div[data-testid="stMetricValue"] {
-        color: #00ffcc !important;
-        font-size: 28px !important;
-    }
-
-    /* Wicket Section Box */
-    .wicket-box {
-        background: linear-gradient(135deg, #2c003e 0%, #3f2b96 100%);
+    /* Section 1: Header / Match Info (Deep Blue Gradient) */
+    .match-header {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         padding: 20px;
         border-radius: 15px;
-        border: 2px solid #ff4b5c;
-        box-shadow: 0 4px 20px rgba(255, 75, 92, 0.3);
+        box-shadow: 0 4px 15px rgba(30, 60, 114, 0.4);
         margin-bottom: 20px;
+        border: 1px solid #4a90e2;
     }
 
-    /* Button Styling */
-    .stButton>button {
-        border-radius: 8px;
-        font-weight: bold;
-        transition: 0.3s ease;
-        width: 100%;
+    /* Section 2: Wicket Details (Dark Red/Crimson Gradient) */
+    .wicket-section {
+        background: linear-gradient(135deg, #512b2b 0%, #301010 100%);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3);
+        margin-bottom: 20px;
+        border: 2px solid #ff4b5c;
     }
-    
-    .stButton>button:hover {
-        transform: scale(1.05);
-        box-shadow: 0 5px 15px rgba(0, 255, 204, 0.4);
+
+    /* Section 3: Live Scoring Controls (Emerald/Green Gradient) */
+    .scoring-section {
+        background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(113, 178, 128, 0.3);
+        margin-bottom: 20px;
+        border: 1px solid #a8ff78;
     }
+
+    /* Section 4: Scorecards (Purple/Indigo Gradient) */
+    .scorecard-section {
+        background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(117, 151, 222, 0.3);
+        margin-bottom: 20px;
+        border: 1px solid #99c2ff;
+    }
+
+    /* Section 5: Match Summary (Dark Orange/Gold Gradient) */
+    .summary-section {
+        background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+        padding: 20px;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(242, 153, 74, 0.3);
+        margin-bottom: 20px;
+        color: #000000 !important;
+        border: 1px solid #ffe58f;
+    }
+
+    /* Metric Cards Styling */
+    div[data-testid="stMetric"] {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+    div[data-testid="stMetric"] label { color: #f0f0f0 !important; font-size: 15px !important; }
+    div[data-testid="stMetric"] div[data-testid="stMetricValue"] { color: #00ffcc !important; font-size: 26px !important; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -206,18 +216,19 @@ def add_ball_logic(is_legal=True):
         if b == 6: o += 1; b = 0
     return b, o
 
-# Header & Logos
+# ==========================================
+# SECTION 1: MATCH HEADER (BLUE GRADIENT)
+# ==========================================
+st.markdown('<div class="match-header">', unsafe_allow_html=True)
 col_l1, col_title, col_l2 = st.columns([1, 4, 1])
 with col_l1:
-    if team1_logo: st.image(Image.open(team1_logo), width=80)
+    if team1_logo: st.image(Image.open(team1_logo), width=70)
     else: st.markdown(f"### 🛡️ {team1}")
-
 with col_title:
-    st.markdown(f"<h2 style='text-align: center;'>Innings {curr}: {batting_team} vs {bowling_team}</h2>", unsafe_allow_html=True)
-    st.info(f"🪙 **Toss:** {toss_winner} won the toss and elected to **{toss_decision}** first.")
-
+    st.markdown(f"<h2 style='text-align: center; color: #ffffff; margin:0;'>Innings {curr}: {batting_team} vs {bowling_team}</h2>", unsafe_allow_html=True)
+    st.markdown(f"<p style='text-align: center; color: #a0c4ff; margin:5px;'>🪙 Toss: {toss_winner} won and elected to <b>{toss_decision}</b> first.</p>", unsafe_allow_html=True)
 with col_l2:
-    if team2_logo: st.image(Image.open(team2_logo), width=80)
+    if team2_logo: st.image(Image.open(team2_logo), width=70)
     else: st.markdown(f"### ⚔️ {team2}")
 
 active_batting_squad = batting_squad_1 if curr == 1 else batting_squad_2
@@ -238,26 +249,21 @@ if curr == 2:
 total_ov_float = overs + (balls / 6.0)
 crr = f"{runs / total_ov_float:.2f}" if total_ov_float > 0 else "0.00"
 
-st.markdown("---")
-col1, col2, col3, col4, col5, col6 = st.columns(6)
-col1.metric("Score", f"{runs}/{wickets}")
-col2.metric("Overs", f"{overs}.{balls}")
-col3.metric("CRR", crr)
-col4.metric("Extras", extras)
-col5.metric("4s", fours)
-col6.metric("6s", sixes)
-
-st.markdown("---")
+st.markdown("<hr style='border: 0.5px solid rgba(255,255,255,0.2);'>", unsafe_allow_html=True)
+c1, c2, c3, c4, c5, c6 = st.columns(6)
+c1.metric("Score", f"{runs}/{wickets}")
+c2.metric("Overs", f"{overs}.{balls}")
+c3.metric("CRR", crr)
+c4.metric("Extras", extras)
+c5.metric("4s", fours)
+c6.metric("6s", sixes)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# WICKET DETAILS PANEL (STYLISH BOX)
+# SECTION 2: WICKET DETAILS (RED GRADIENT)
 # ==========================================
-st.markdown("""
-<div style='background: linear-gradient(135deg, #1f4068 0%, #162447 100%); padding: 15px; border-radius: 12px; border: 2px solid #ff4b5c; margin-bottom: 20px;'>
-    <h3 style='color: #ff4b5c; margin-top: 0;'>🔴 WICKET DETAILS</h3>
-</div>
-""", unsafe_allow_html=True)
-
+st.markdown('<div class="wicket-section">', unsafe_allow_html=True)
+st.markdown("<h3 style='color: #ff8088; margin-top:0;'>🔴 WICKET DETAILS</h3>", unsafe_allow_html=True)
 w_col1, w_col2, w_col3, w_col4, w_col5 = st.columns(5)
 with w_col1: out_batsman = st.selectbox("OUT BATSMAN", active_batting_squad)
 with w_col2: fielder_name = st.selectbox("FIELDER", active_bowling_squad)
@@ -291,11 +297,14 @@ if set_wicket_btn:
 
     st.success(f"Wicket Set: {out_batsman} ({out_type})!")
     st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
-st.markdown("---")
+# ==========================================
+# SECTION 3: LIVE SCORING CONTROLS (GREEN GRADIENT)
+# ==========================================
+st.markdown('<div class="scoring-section">', unsafe_allow_html=True)
+st.markdown("<h3 style='color: #a8ff78; margin-top:0;'>🎮 LIVE SCORING CONTROLS</h3>", unsafe_allow_html=True)
 
-# Regular Scoring Controls
-st.subheader("🎮 Live Scoring Controls")
 def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=False):
     save_history()
     new_runs = runs + r_add
@@ -328,7 +337,7 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
 
 c1, c2, c3, c4, c5, c6, c7 = st.columns(7)
 with c1:
-    if st.button("⚪ 0 Run (Dot)"): record_ball(0, True, False, False, True); st.rerun()
+    if st.button("⚪ 0 Run"): record_ball(0, True, False, False, True); st.rerun()
 with c2:
     if st.button("➕ 1 Run"): record_ball(1, True, False, False, False); st.rerun()
 with c3:
@@ -346,7 +355,6 @@ with c7:
             update_curr(last['runs'], last['wickets'], last['balls'], last['overs'], last['extras'], last['fours'], last['sixes'])
             st.success("Undone!"); st.rerun()
 
-# Extras
 e1, e2 = st.columns(2)
 with e1:
     if st.button("🟡 Wide (+1 Extra)"):
@@ -361,19 +369,21 @@ with e2:
         else: st.session_state.i2_extras += 1
         update_curr(runs + 1, wickets, balls, overs, extras + 1, fours, sixes); st.rerun()
 
-# Innings Switch Button
-st.markdown("---")
 if curr == 1:
-    if st.button("🏁 End 1st Innings & Start 2nd Innings"):
+    st.markdown("<br>", unsafe_allow_html=True)
+    if st.button("🏁 End 1st Innings & Start 2nd Innings", use_container_width=True):
         st.session_state.target = runs + 1
         st.session_state.inning = 2
         st.rerun()
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SCORECARDS & MATCH SUMMARY
+# SECTION 4: SCORECARDS (PURPLE GRADIENT)
 # ==========================================
-st.markdown("---")
-st.subheader(f"📊 1st Innings Scorecard ({i1_bat} vs {i1_bowl})")
+st.markdown('<div class="scorecard-section">', unsafe_allow_html=True)
+st.markdown("<h3 style='color: #d4bfff; margin-top:0;'>📊 SCORECARDS & STATS</h3>", unsafe_allow_html=True)
+
+st.subheader(f"1st Innings Scorecard ({i1_bat} vs {i1_bowl})")
 col_s1, col_s2 = st.columns(2)
 with col_s1:
     st.session_state.i1_batting_df['SR'] = st.session_state.i1_batting_df.apply(lambda r: round((r['Runs'] / r['Balls']) * 100, 2) if r['Balls'] > 0 else 0.0, axis=1)
@@ -383,7 +393,7 @@ with col_s2:
     st.session_state.i1_bowling_df = st.data_editor(st.session_state.i1_bowling_df, key="i1_bowl_full", num_rows="fixed")
 
 st.markdown("---")
-st.subheader(f"📊 2nd Innings Scorecard ({i2_bat} vs {i2_bowl})")
+st.subheader(f"2nd Innings Scorecard ({i2_bat} vs {i2_bowl})")
 col_s3, col_s4 = st.columns(2)
 with col_s3:
     st.session_state.i2_batting_df['SR'] = st.session_state.i2_batting_df.apply(lambda r: round((r['Runs'] / r['Balls']) * 100, 2) if r['Balls'] > 0 else 0.0, axis=1)
@@ -391,13 +401,25 @@ with col_s3:
 with col_s4:
     st.session_state.i2_bowling_df['Economy'] = st.session_state.i2_bowling_df.apply(lambda r: round(r['Runs'] / r['Overs'], 2) if r['Overs'] > 0 else 0.0, axis=1)
     st.session_state.i2_bowling_df = st.data_editor(st.session_state.i2_bowling_df, key="i2_bowl_full", num_rows="fixed")
+st.markdown('</div>', unsafe_allow_html=True)
 
-# Match Summary Table
-st.markdown("---")
-st.subheader("📋 Match Summary")
+# ==========================================
+# SECTION 5: MATCH SUMMARY (ORANGE/GOLD GRADIENT)
+# ==========================================
+st.markdown('<div class="summary-section">', unsafe_allow_html=True)
+st.markdown("<h3 style='color: #000000; margin-top:0;'>📋 MATCH SUMMARY OVERVIEW</h3>", unsafe_allow_html=True)
 summary_data = [
     {"Innings": "1st Innings", "Batting Team": st.session_state.i1_batting, "Bowling Team": st.session_state.i1_bowling, "Score": f"{st.session_state.i1_runs}/{st.session_state.i1_wickets}", "Overs": f"{st.session_state.i1_overs}.{st.session_state.i1_balls}"},
     {"Innings": "2nd Innings", "Batting Team": st.session_state.i2_batting, "Bowling Team": st.session_state.i2_bowling, "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}", "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}"}
 ]
 df_summary = pd.DataFrame(summary_data)
 st.table(df_summary)
+
+csv = df_summary.to_csv(index=False).encode('utf-8')
+st.download_button(
+    label="📥 Download Match Summary as CSV",
+    data=csv,
+    file_name='cricket_match_summary.csv',
+    mime='text/css',
+)
+st.markdown('</div>', unsafe_allow_html=True)
