@@ -228,7 +228,6 @@ with col_l2:
 active_batting_squad = batting_squad_1 if curr == 1 else batting_squad_2
 active_bowling_squad = bowling_squad_1 if curr == 1 else bowling_squad_2
 
-# Session state for maintaining strike rotation
 if 'striker' not in st.session_state: st.session_state.striker = active_batting_squad[0] if active_batting_squad else ""
 if 'non_striker' not in st.session_state: st.session_state.non_striker = active_batting_squad[1] if len(active_batting_squad) > 1 else ""
 
@@ -266,7 +265,7 @@ c6.metric("6s", sixes)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 2: WICKET DETAILS
+# SECTION 2: WICKET DETAILS (FIXED: BALL COUNTS FOR OUT BATSMAN)
 # ==========================================
 st.markdown('<div class="wicket-section">', unsafe_allow_html=True)
 st.markdown("<h3 style='color: #ff8088; margin-top:0;'>🔴 WICKET DETAILS</h3>", unsafe_allow_html=True)
@@ -285,9 +284,11 @@ if set_wicket_btn:
     nb, no = add_ball_logic(True)
     update_curr(runs, new_wickets, nb, no, extras, fours, sixes)
     
+    # Update Batting DF and increment balls for the out batsman
     bat_df = st.session_state.i1_batting_df if curr == 1 else st.session_state.i2_batting_df
     if out_batsman in bat_df['Batsman'].values:
         idx = bat_df.index[bat_df['Batsman'] == out_batsman][0]
+        bat_df.loc[idx, 'Balls'] += 1  # 👈 Added ball count for out batsman
         bat_df.loc[idx, 'How Out / Status'] = out_type
         if out_type in ["Caught", "Stumped"]:
             bat_df.loc[idx, 'Bowled / Fielder'] = f"{wicket_bowler} (b) / {fielder_name} (c)"
@@ -296,6 +297,7 @@ if set_wicket_btn:
         else:
             bat_df.loc[idx, 'Bowled / Fielder'] = wicket_bowler
 
+    # Update Bowling DF
     bowl_df = st.session_state.i1_bowling_df if curr == 1 else st.session_state.i2_bowling_df
     if wicket_bowler in bowl_df['Bowler'].values and out_type not in ["Run Out", "Retired Hurt"]:
         b_idx = bowl_df.index[bowl_df['Bowler'] == wicket_bowler][0]
@@ -348,11 +350,9 @@ def record_ball(r_add=0, is_legal=True, is_four=False, is_six=False, is_dot=Fals
             else: bowl_df.loc[b_idx, 'Overs'] = full_ov + (ball_part / 10.0)
 
     # STRIKE ROTATION LOGIC
-    # 1. Odd runs rotate strike (+1, +3, etc.)
     if r_add % 2 != 0:
         st.session_state.striker, st.session_state.non_striker = st.session_state.non_striker, st.session_state.striker
         
-    # 2. Over completion (6 legal balls) rotates strike
     if is_legal and nb == 0 and no > prev_overs:
         st.session_state.striker, st.session_state.non_striker = st.session_state.non_striker, st.session_state.striker
 
