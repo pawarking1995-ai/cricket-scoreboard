@@ -65,12 +65,12 @@ batting_team = i1_bat if st.session_state.inning == 1 else i2_bat
 bowling_team = i1_bowl if st.session_state.inning == 1 else i2_bowl
 
 st.sidebar.markdown("---")
-st.sidebar.header("👥 Player Squads (1 to 11)")
+st.sidebar.header("👥 Player Squads (Top 5+)")
 default_squad_1 = ", ".join([f"Player {i}" for i in range(1, 12)])
 default_squad_2 = ", ".join([f"Player {chr(65+i)}" for i in range(11)])
 
-team1_players_input = st.sidebar.text_area(f"{team1} Players (11 names comma separated)", default_squad_1)
-team2_players_input = st.sidebar.text_area(f"{team2} Players (11 names comma separated)", default_squad_2)
+team1_players_input = st.sidebar.text_area(f"{team1} Players (Comma separated)", default_squad_1)
+team2_players_input = st.sidebar.text_area(f"{team2} Players (Comma separated)", default_squad_2)
 
 team1_players = [p.strip() for p in team1_players_input.split(",") if p.strip()]
 team2_players = [p.strip() for p in team2_players_input.split(",") if p.strip()]
@@ -81,48 +81,46 @@ bowling_squad_1 = team2_players if i1_bowl == team2 else team1_players
 batting_squad_2 = team1_players if i2_bat == team1 else team2_players
 bowling_squad_2 = team2_players if i2_bowl == team2 else team1_players
 
-# Initialize 1st Innings Scorecards
+# Initialize 1st Innings Scorecards (Top 5 Batters, Top 5 Bowlers)
 if 'i1_batting_df' not in st.session_state:
     st.session_state.i1_batting_df = pd.DataFrame({
-        "Batsman": batting_squad_1[:11] if len(batting_squad_1) >= 11 else batting_squad_1 + [""]*(11-len(batting_squad_1)),
-        "Runs": [0]*11,
-        "Balls": [0]*11,
-        "4s": [0]*11,
-        "6s": [0]*11,
-        "Status": ["Yet to Bat"]*11
+        "Batsman": batting_squad_1[:5] if len(batting_squad_1) >= 5 else batting_squad_1 + [""]*(5-len(batting_squad_1)),
+        "Runs": [0]*5,
+        "Balls": [0]*5,
+        "4s": [0]*5,
+        "6s": [0]*5,
+        "SR": [0.0]*5
     })
 
 if 'i1_bowling_df' not in st.session_state:
     st.session_state.i1_bowling_df = pd.DataFrame({
-        "Bowler": bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1,
-        "Overs": [0.0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1),
-        "Dot Balls": [0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1),
-        "Maidens": [0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1),
-        "Runs": [0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1),
-        "Wickets": [0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1),
-        "Economy": [0.0]*len(bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1)
+        "Bowler": bowling_squad_1[:5] if len(bowling_squad_1) >= 5 else bowling_squad_1 + [""]*(5-len(bowling_squad_1)),
+        "Overs": [0.0]*5,
+        "Dots": [0]*5,
+        "Runs": [0]*5,
+        "Wickets": [0]*5,
+        "Economy": [0.0]*5
     })
 
 # Initialize 2nd Innings Scorecards
 if 'i2_batting_df' not in st.session_state:
     st.session_state.i2_batting_df = pd.DataFrame({
-        "Batsman": batting_squad_2[:11] if len(batting_squad_2) >= 11 else batting_squad_2 + [""]*(11-len(batting_squad_2)),
-        "Runs": [0]*11,
-        "Balls": [0]*11,
-        "4s": [0]*11,
-        "6s": [0]*11,
-        "Status": ["Yet to Bat"]*11
+        "Batsman": batting_squad_2[:5] if len(batting_squad_2) >= 5 else batting_squad_2 + [""]*(5-len(batting_squad_2)),
+        "Runs": [0]*5,
+        "Balls": [0]*5,
+        "4s": [0]*5,
+        "6s": [0]*5,
+        "SR": [0.0]*5
     })
 
 if 'i2_bowling_df' not in st.session_state:
     st.session_state.i2_bowling_df = pd.DataFrame({
-        "Bowler": bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2,
-        "Overs": [0.0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2),
-        "Dot Balls": [0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2),
-        "Maidens": [0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2),
-        "Runs": [0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2),
-        "Wickets": [0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2),
-        "Economy": [0.0]*len(bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2)
+        "Bowler": bowling_squad_2[:5] if len(bowling_squad_2) >= 5 else bowling_squad_2 + [""]*(5-len(bowling_squad_2)),
+        "Overs": [0.0]*5,
+        "Dots": [0]*5,
+        "Runs": [0]*5,
+        "Wickets": [0]*5,
+        "Economy": [0.0]*5
     })
 
 st.sidebar.markdown("---")
@@ -310,33 +308,45 @@ if curr == 1:
         st.session_state.inning = 2
         st.rerun()
 
-# 1st Innings Detailed Scorecards
+# 1st Innings Detailed Scorecards (Top 5 Batters & Bowlers)
 if curr == 1 or st.session_state.get('i1_runs', 0) > 0:
     st.markdown("---")
-    st.subheader(f"📊 1st Innings Detailed Scorecard ({i1_bat})")
+    st.subheader(f"📊 1st Innings Scorecard: {i1_bat} (Batting) vs {i1_bowl} (Bowling)")
     col_b1, col_b2 = st.columns(2)
     with col_b1:
-        st.markdown("#### 🏏 Batting (1-11)")
+        st.markdown(f"#### 🏏 {i1_bat} - Top 5 Batting")
+        st.session_state.i1_batting_df['SR'] = st.session_state.i1_batting_df.apply(
+            lambda row: round((row['Runs'] / row['Balls']) * 100, 2) if row['Balls'] > 0 else 0.0, axis=1
+        )
         st.session_state.i1_batting_df = st.data_editor(st.session_state.i1_batting_df, key="bat_1", num_rows="fixed")
     with col_b2:
-        st.markdown("#### ⚾ Bowling")
+        st.markdown(f"#### ⚾ {i1_bowl} - Bowling")
+        st.session_state.i1_bowling_df['Economy'] = st.session_state.i1_bowling_df.apply(
+            lambda row: round(row['Runs'] / row['Overs'], 2) if row['Overs'] > 0 else 0.0, axis=1
+        )
         st.session_state.i1_bowling_df = st.data_editor(st.session_state.i1_bowling_df, key="bowl_1", num_rows="fixed")
 
-# 2nd Innings Detailed Scorecards
+# 2nd Innings Detailed Scorecards (Top 5 Batters & Bowlers)
 if curr == 2 or st.session_state.get('i2_runs', 0) > 0:
     st.markdown("---")
-    st.subheader(f"📊 2nd Innings Detailed Scorecard ({i2_bat})")
+    st.subheader(f"📊 2nd Innings Scorecard: {i2_bat} (Batting) vs {i2_bowl} (Bowling)")
     col_cb1, col_cb2 = st.columns(2)
     with col_cb1:
-        st.markdown("#### 🏏 Batting (1-11)")
+        st.markdown(f"#### 🏏 {i2_bat} - Top 5 Batting")
+        st.session_state.i2_batting_df['SR'] = st.session_state.i2_batting_df.apply(
+            lambda row: round((row['Runs'] / row['Balls']) * 100, 2) if row['Balls'] > 0 else 0.0, axis=1
+        )
         st.session_state.i2_batting_df = st.data_editor(st.session_state.i2_batting_df, key="bat_2", num_rows="fixed")
     with col_cb2:
-        st.markdown("#### ⚾ Bowling")
+        st.markdown(f"#### ⚾ {i2_bowl} - Bowling")
+        st.session_state.i2_bowling_df['Economy'] = st.session_state.i2_bowling_df.apply(
+            lambda row: round(row['Runs'] / row['Overs'], 2) if row['Overs'] > 0 else 0.0, axis=1
+        )
         st.session_state.i2_bowling_df = st.data_editor(st.session_state.i2_bowling_df, key="bowl_2", num_rows="fixed")
 
 # Match Summary Table Section
 st.markdown("---")
-st.subheader("📋 Match Summary & Scorecards")
+st.subheader("📋 Match Summary Overview")
 
 i1_ov_f = st.session_state.i1_overs + (st.session_state.i1_balls / 6.0)
 i1_crr = f"{st.session_state.i1_runs / i1_ov_f:.2f}" if i1_ov_f > 0 else "0.00"
