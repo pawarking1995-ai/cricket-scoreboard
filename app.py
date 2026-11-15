@@ -11,7 +11,7 @@ st.markdown("""
 <style>
     .main { background-color: #0e1117; color: #ffffff; }
     
-    /* Section 1: Header / Match Info (Deep Blue Gradient) */
+    /* Section 1: Header / Match Info */
     .match-header {
         background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
         padding: 20px;
@@ -21,7 +21,7 @@ st.markdown("""
         border: 1px solid #4a90e2;
     }
 
-    /* Section 2: Wicket Details (Dark Red/Crimson Gradient) */
+    /* Section 2: Wicket Details */
     .wicket-section {
         background: linear-gradient(135deg, #512b2b 0%, #301010 100%);
         padding: 20px;
@@ -31,7 +31,7 @@ st.markdown("""
         border: 2px solid #ff4b5c;
     }
 
-    /* Section 3: Live Scoring Controls (Emerald/Green Gradient) */
+    /* Section 3: Live Scoring Controls */
     .scoring-section {
         background: linear-gradient(135deg, #134e5e 0%, #71b280 100%);
         padding: 20px;
@@ -41,7 +41,7 @@ st.markdown("""
         border: 1px solid #a8ff78;
     }
 
-    /* Section 4: Scorecards (Purple/Indigo Gradient) */
+    /* Section 4: Scorecards */
     .scorecard-section {
         background: linear-gradient(135deg, #2b1055 0%, #7597de 100%);
         padding: 20px;
@@ -51,7 +51,7 @@ st.markdown("""
         border: 1px solid #99c2ff;
     }
 
-    /* Section 5: Match Summary (Dark Orange/Gold Gradient) */
+    /* Section 5: Match Summary */
     .summary-section {
         background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
         padding: 20px;
@@ -62,7 +62,6 @@ st.markdown("""
         border: 1px solid #ffe58f;
     }
 
-    /* Metric Cards Styling */
     div[data-testid="stMetric"] {
         background: rgba(0, 0, 0, 0.3);
         padding: 12px;
@@ -217,7 +216,7 @@ def add_ball_logic(is_legal=True):
     return b, o
 
 # ==========================================
-# SECTION 1: MATCH HEADER (BLUE GRADIENT)
+# SECTION 1: MATCH HEADER
 # ==========================================
 st.markdown('<div class="match-header">', unsafe_allow_html=True)
 col_l1, col_title, col_l2 = st.columns([1, 4, 1])
@@ -260,7 +259,7 @@ c6.metric("6s", sixes)
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 2: WICKET DETAILS (RED GRADIENT)
+# SECTION 2: WICKET DETAILS
 # ==========================================
 st.markdown('<div class="wicket-section">', unsafe_allow_html=True)
 st.markdown("<h3 style='color: #ff8088; margin-top:0;'>🔴 WICKET DETAILS</h3>", unsafe_allow_html=True)
@@ -300,7 +299,7 @@ if set_wicket_btn:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 3: LIVE SCORING CONTROLS (GREEN GRADIENT)
+# SECTION 3: LIVE SCORING CONTROLS
 # ==========================================
 st.markdown('<div class="scoring-section">', unsafe_allow_html=True)
 st.markdown("<h3 style='color: #a8ff78; margin-top:0;'>🎮 LIVE SCORING CONTROLS</h3>", unsafe_allow_html=True)
@@ -378,7 +377,7 @@ if curr == 1:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 4: SCORECARDS (PURPLE GRADIENT)
+# SECTION 4: SCORECARDS
 # ==========================================
 st.markdown('<div class="scorecard-section">', unsafe_allow_html=True)
 st.markdown("<h3 style='color: #d4bfff; margin-top:0;'>📊 SCORECARDS & STATS</h3>", unsafe_allow_html=True)
@@ -404,22 +403,47 @@ with col_s4:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# SECTION 5: MATCH SUMMARY (ORANGE/GOLD GRADIENT)
+# SECTION 5: MATCH SUMMARY (FIXED & VISIBLE)
 # ==========================================
 st.markdown('<div class="summary-section">', unsafe_allow_html=True)
-st.markdown("<h3 style='color: #000000; margin-top:0;'>📋 MATCH SUMMARY OVERVIEW</h3>", unsafe_allow_html=True)
-summary_data = [
-    {"Innings": "1st Innings", "Batting Team": st.session_state.i1_batting, "Bowling Team": st.session_state.i1_bowling, "Score": f"{st.session_state.i1_runs}/{st.session_state.i1_wickets}", "Overs": f"{st.session_state.i1_overs}.{st.session_state.i1_balls}"},
-    {"Innings": "2nd Innings", "Batting Team": st.session_state.i2_batting, "Bowling Team": st.session_state.i2_bowling, "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}", "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}"}
-]
-df_summary = pd.DataFrame(summary_data)
-st.table(df_summary)
+st.markdown("<h2 style='color: #000000; margin-top:0;'>📋 MATCH SUMMARY OVERVIEW</h2>", unsafe_allow_html=True)
 
+i1_ov_f = st.session_state.i1_overs + (st.session_state.i1_balls / 6.0)
+i1_crr = f"{st.session_state.i1_runs / i1_ov_f:.2f}" if i1_ov_f > 0 else "0.00"
+
+i2_ov_f = st.session_state.i2_overs + (st.session_state.i2_balls / 6.0)
+i2_crr = f"{st.session_state.i2_runs / i2_ov_f:.2f}" if i2_ov_f > 0 else "0.00"
+
+summary_data = [
+    {
+        "Innings": "1st Innings",
+        "Batting Team": st.session_state.i1_batting,
+        "Bowling Team": st.session_state.i1_bowling,
+        "Score": f"{st.session_state.i1_runs}/{st.session_state.i1_wickets}",
+        "Overs": f"{st.session_state.i1_overs}.{st.session_state.i1_balls}",
+        "Extras": st.session_state.i1_extras,
+        "CRR": i1_crr
+    },
+    {
+        "Innings": "2nd Innings",
+        "Batting Team": st.session_state.i2_batting,
+        "Bowling Team": st.session_state.i2_bowling,
+        "Score": f"{st.session_state.i2_runs}/{st.session_state.i2_wickets}",
+        "Overs": f"{st.session_state.i2_overs}.{st.session_state.i2_balls}",
+        "Extras": st.session_state.i2_extras,
+        "CRR": i2_crr
+    }
+]
+
+df_summary = pd.DataFrame(summary_data)
+st.dataframe(df_summary, use_container_width=True, hide_index=True)
+
+st.markdown("<br>", unsafe_allow_html=True)
 csv = df_summary.to_csv(index=False).encode('utf-8')
 st.download_button(
     label="📥 Download Match Summary as CSV",
     data=csv,
     file_name='cricket_match_summary.csv',
-    mime='text/css',
+    mime='text/csv',
 )
 st.markdown('</div>', unsafe_allow_html=True)
